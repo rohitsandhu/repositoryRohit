@@ -11,8 +11,8 @@ import javax.swing.JTextField;
 
 import com.toedter.calendar.JCalendar;
 
-import classes.Client;
-import classes.Hotels;
+import model.Client;
+import model.Hotels;
 
 
 public class Funcions {
@@ -50,7 +50,7 @@ public class Funcions {
 
 	public static boolean comprovarNom(JTextField tfNom) {
 		
-		if(tfNom.getText().matches("^[ A-Za-z]+$")) {
+		if(tfNom.getText().matches("^[ A-Za-zñÑáéíóúÁÉÍÓÚ]+$")) {
 			return true;
 		}else {
 			return false;
@@ -59,7 +59,7 @@ public class Funcions {
 
 	public static boolean comprovarCognoms(JTextField tfCognoms) {
 		
-		if(tfCognoms.getText().matches("^[ A-Za-z]+$")) {
+		if(tfCognoms.getText().matches("^[ A-Za-zñÑáéíóúÁÉÍÓÚ]+$")) {
 			return true;
 		}else {
 			return false;

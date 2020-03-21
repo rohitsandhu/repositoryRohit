@@ -25,9 +25,9 @@ import javax.swing.table.DefaultTableModel;
 import com.toedter.calendar.JCalendar;
 import com.toedter.calendar.JDateChooser;
 
-import classes.Client;
-import classes.Hotels;
-import classes.Reserva;
+import model.Client;
+import model.Hotels;
+import model.Reserva;
 
 import java.awt.Image;
 
