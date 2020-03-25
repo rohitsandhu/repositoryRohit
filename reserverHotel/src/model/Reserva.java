@@ -65,9 +65,10 @@ public class Reserva {
 
 			for(Reserva rr : hotel.getAlReservesPendents()) {
 					if( Integer.parseInt(rr.getNumHabitació()) == hh.getNumHabitació() && !(
-						(this.getLdEntrada().isAfter(rr.getLdEntrada().minusDays(1)) && this.getLdEntrada().isBefore(rr.getLdSortida())) ||
+						(this.getLdEntrada().isBefore(rr.getLdEntrada().minusDays(1)) && this.getLdSortida().isAfter(rr.getLdSortida())) ||
 						(this.getLdSortida().isAfter(rr.getLdEntrada().minusDays(1)) && this.getLdSortida().isBefore(rr.getLdSortida())) ||
-						(this.getLdEntrada().isBefore(rr.getLdEntrada().minusDays(1)) && this.getLdSortida().isAfter(rr.getLdSortida())) )) {
+						(this.getLdEntrada().isAfter(rr.getLdEntrada().minusDays(1)) && this.getLdEntrada().isBefore(rr.getLdSortida())) 
+						 )) {
 						
 						this.setNumHabitació(Integer.toString(hh.getNumHabitació()));
 						return false;
@@ -76,9 +77,10 @@ public class Reserva {
 			
 			for(Reserva rr : hotel.getAlReservesConfirmades()) {
 					if( Integer.parseInt(rr.getNumHabitació()) == hh.getNumHabitació() && !(
-						(this.getLdEntrada().isAfter(rr.getLdEntrada().minusDays(1)) && this.getLdEntrada().isBefore(rr.getLdSortida())) ||
+						(this.getLdEntrada().isBefore(rr.getLdEntrada().minusDays(1)) && this.getLdSortida().isAfter(rr.getLdSortida())) ||
 						(this.getLdSortida().isAfter(rr.getLdEntrada().minusDays(1)) && this.getLdSortida().isBefore(rr.getLdSortida())) ||
-						(this.getLdEntrada().isBefore(rr.getLdEntrada().minusDays(1)) && this.getLdSortida().isAfter(rr.getLdSortida())) )) {
+						(this.getLdEntrada().isAfter(rr.getLdEntrada().minusDays(1)) && this.getLdEntrada().isBefore(rr.getLdSortida())) 
+						 )) {
 						
 						this.setNumHabitació(Integer.toString(hh.getNumHabitació()));
 						return false;
