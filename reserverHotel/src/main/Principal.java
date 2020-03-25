@@ -1,11 +1,11 @@
-package controller;
+package main;
 
-import vista.Visuals;
+import vista.Vista;
 
 public class Principal{
 	
 	public static void main(String[] args) {
 		
-		Visuals v = new Visuals();
+		Vista v = new Vista();
 	}
 }

@@ -14,6 +14,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -25,13 +26,14 @@ import javax.swing.table.DefaultTableModel;
 import com.toedter.calendar.JCalendar;
 import com.toedter.calendar.JDateChooser;
 
+import controller.Controller;
 import model.Client;
-import model.Hotels;
+import model.Hotel;
 import model.Reserva;
 
 import java.awt.Image;
 
-public class Visuals extends JFrame{
+public class Vista extends JFrame{
 
 	JPanel panell1;
 	JLabel titolP1;
@@ -44,7 +46,6 @@ public class Visuals extends JFrame{
 	JTable taula2;
 	JScrollPane scroll2;
 	JDateChooser calendari1;
-	
 	
 	JPanel panell2;
 	JLabel titolP2;
@@ -83,20 +84,22 @@ public class Visuals extends JFrame{
 	JScrollPane scroll3;
 	JList lista2;
 	DefaultListModel listModel2;
+	
 	JLabel resultatDni;
 	JLabel resultatNom;
 	JLabel resultatCognoms;
 	JLabel resultatNits;
 	JLabel resultatPersones;
+	JLabel resultatNumPersones;
+	JLabel resultatNumHabitació;
 	
 	ImageIcon imgTic = new ImageIcon("tic.png");
 	ImageIcon imgX = new ImageIcon("x.png");
 	ImageIcon ticReduit = new ImageIcon(imgTic.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));
 	ImageIcon xReduit = new ImageIcon(imgX.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));
 	
-	Hotels hotel = new Hotels(" Rohitxi'S Hotel ");
 	
-	public Visuals() {
+	public Vista() {
 		
         this.setVisible(true);
         this.setSize(1204, 900);
@@ -116,6 +119,8 @@ public class Visuals extends JFrame{
     	listener2();
     	listenerBotoTitle();
     	listenerBotoReserva();
+    	listenerHabitació();
+    	listenerBotoGuarda2();
     }
     
 	private void posarPanells() {
@@ -155,13 +160,15 @@ public class Visuals extends JFrame{
     	panell1.add(text1P1);
     	
     	model1 = new DefaultTableModel();
-    	model1.addColumn("#Reserva");
+    	model1.addColumn("DNI");
         model1.addColumn("Dia");
         model1.addColumn("Persones");
         model1.addColumn("Habitació");
     	taula1 = new JTable (model1);
     	taula1.setBounds(20,150,300,200);
     	taula1.setBorder(BorderFactory.createLineBorder(Color.black));
+    	taula1.getTableHeader().setReorderingAllowed(false);
+    	taula1.setEnabled(false);
     	panell1.add(taula1);
     	scroll1 = new JScrollPane(taula1,ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     	scroll1.setBounds(20,150,300,200);
@@ -185,16 +192,13 @@ public class Visuals extends JFrame{
     	taula2 = new JTable (model2);
     	taula2.setBounds(20,480,300,200);
     	taula2.setBorder(BorderFactory.createLineBorder(Color.black));
+    	taula2.getTableHeader().setReorderingAllowed(false);
+    	taula2.setEnabled(false);
     	panell1.add(taula2);
     	scroll2 = new JScrollPane(taula2,ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     	scroll2.setBounds(20,480,350,250);
     	panell1.add(scroll2);
-    	
-    	
-    	
     }
-    
-
     
     private void modificacionsPanell2() {
     	
@@ -247,7 +251,7 @@ public class Visuals extends JFrame{
     	panell2.add(tfCognoms);
     	
     	resultatCognoms = new JLabel();
-    	resultatCognoms.setBounds(360, 200,30,30);
+    	resultatCognoms.setBounds(360,200,30,30);
     	panell2.add(resultatCognoms);
     	
     	textNumPersones = new JLabel();
@@ -334,12 +338,17 @@ public class Visuals extends JFrame{
     	 
     	 backNum = new JLabel();
     	 backNum.setText(" Num. ");
-    	 backNum.setBounds(20,290,50,30);
+    	 backNum.setBounds(20,290,40,30);
     	 panell3.add(backNum);
     	 
     	 tfBackNum = new JTextField();
-    	 tfBackNum.setBounds(80,290,70,30);
+    	 tfBackNum.setBounds(65,290,70,30);
+    	 tfBackNum.setName("numHab");
     	 panell3.add(tfBackNum);
+    	 
+    	 resultatNumHabitació= new JLabel();
+    	 resultatNumHabitació.setBounds(140,290,30,30);
+    	 panell3.add(resultatNumHabitació);
     	 
     	 backPers = new JLabel();
     	 backPers.setText(" #Pers. ");
@@ -348,11 +357,17 @@ public class Visuals extends JFrame{
     	 
     	 tfBackPers = new JTextField();
     	 tfBackPers.setBounds(230,290,70,30);
+    	 tfBackPers.setName("numPers");
     	 panell3.add(tfBackPers);
+    	  
+    	 resultatNumPersones = new JLabel();
+    	 resultatNumPersones.setBounds(305, 290, 30, 30);
+    	 panell3.add(resultatNumPersones);
     	 
     	 butoGuarda2 = new JButton();
     	 butoGuarda2.setText(" Guarda! ");
     	 butoGuarda2.setBounds(120,340, 140, 30);
+    	 butoGuarda2.setEnabled(false);
     	 panell3.add(butoGuarda2);
     	 
     	 consultaRes = new JLabel();
@@ -383,7 +398,7 @@ public class Visuals extends JFrame{
     	 listenerBotoTitle();
     	 
     }
-    
+      
     private void listener2() {
 
     	KeyListener key = new KeyListener(){
@@ -398,7 +413,7 @@ public class Visuals extends JFrame{
             	
             	if(e.getComponent().getName().equalsIgnoreCase("dni")) {
                 	
-            		if(Funcions.comprovarDni(tfDni)) {
+            		if(Controller.comprovarDni(tfDni)) {
             			resultatDni.setIcon(ticReduit);
                 		panell2.add(resultatDni);
                 	}else {
@@ -406,7 +421,7 @@ public class Visuals extends JFrame{
                 		panell2.add(resultatDni);
                 	}
             		
-            		if(Funcions.comprovarDni(tfDni) && Funcions.comprovarNom(tfNom) && Funcions.comprovarCognoms(tfCognoms) && Funcions.comprovarNits(tfNumNits) && Funcions.comprovarPersones(tfNumPersones)) {
+            		if(Controller.comprovarDni(tfDni) && Controller.comprovarNom(tfNom) && Controller.comprovarCognoms(tfCognoms) && Controller.comprovarNits(tfNumNits) && Controller.comprovarPersones(tfNumPersones)) {
             			botoReserva.setEnabled(true);
             			panell2.add(botoReserva);
             		}else {
@@ -415,7 +430,7 @@ public class Visuals extends JFrame{
             		}
                 }else if(e.getComponent().getName().equalsIgnoreCase("nom")) {
                 	
-            		if(Funcions.comprovarNom(tfNom)) {
+            		if(Controller.comprovarNom(tfNom)) {
             			resultatNom.setIcon(ticReduit);
                 		panell2.add(resultatNom);
                 	}else {
@@ -423,7 +438,7 @@ public class Visuals extends JFrame{
                 		panell2.add(resultatNom);
                 	}
             		
-            		if(Funcions.comprovarDni(tfDni) && Funcions.comprovarNom(tfNom) && Funcions.comprovarCognoms(tfCognoms) && Funcions.comprovarNits(tfNumNits) && Funcions.comprovarPersones(tfNumPersones)) {
+            		if(Controller.comprovarDni(tfDni) && Controller.comprovarNom(tfNom) && Controller.comprovarCognoms(tfCognoms) && Controller.comprovarNits(tfNumNits) && Controller.comprovarPersones(tfNumPersones)) {
             			botoReserva.setEnabled(true);
             			panell2.add(botoReserva);
             		}else {
@@ -433,7 +448,7 @@ public class Visuals extends JFrame{
                 	
                 }else if (e.getComponent().getName().equalsIgnoreCase("cognoms")) {
                 	
-            		if(Funcions.comprovarCognoms(tfCognoms)) {
+            		if(Controller.comprovarCognoms(tfCognoms)) {
             			resultatCognoms.setIcon(ticReduit);
                 		panell2.add(resultatCognoms);
                 	}else {
@@ -441,7 +456,7 @@ public class Visuals extends JFrame{
                 		panell2.add(resultatCognoms);
                 	}
                 	
-            		if(Funcions.comprovarDni(tfDni) && Funcions.comprovarNom(tfNom) && Funcions.comprovarCognoms(tfCognoms) && Funcions.comprovarNits(tfNumNits) && Funcions.comprovarPersones(tfNumPersones)) {
+            		if(Controller.comprovarDni(tfDni) && Controller.comprovarNom(tfNom) && Controller.comprovarCognoms(tfCognoms) && Controller.comprovarNits(tfNumNits) && Controller.comprovarPersones(tfNumPersones)) {
             			botoReserva.setEnabled(true);
             			panell2.add(botoReserva);
             		}else {
@@ -450,7 +465,7 @@ public class Visuals extends JFrame{
             		}
                 }else if (e.getComponent().getName().equalsIgnoreCase("nits")) {
                 	
-            		if(Funcions.comprovarNits(tfNumNits)) {
+            		if(Controller.comprovarNits(tfNumNits)) {
             			resultatNits.setIcon(ticReduit);
                 		panell2.add(resultatNits);
                 	}else {
@@ -458,7 +473,7 @@ public class Visuals extends JFrame{
                 		panell2.add(resultatNits);
                 	}
                 	
-            		if(Funcions.comprovarDni(tfDni) && Funcions.comprovarNom(tfNom) && Funcions.comprovarCognoms(tfCognoms) && Funcions.comprovarNits(tfNumNits) && Funcions.comprovarPersones(tfNumPersones)) {
+            		if(Controller.comprovarDni(tfDni) && Controller.comprovarNom(tfNom) && Controller.comprovarCognoms(tfCognoms) && Controller.comprovarNits(tfNumNits) && Controller.comprovarPersones(tfNumPersones)) {
             			botoReserva.setEnabled(true);
             			panell2.add(botoReserva);
             		}else {
@@ -467,7 +482,7 @@ public class Visuals extends JFrame{
             		}
                 }else  {
                 	
-            		if(Funcions.comprovarPersones(tfNumPersones)) {
+            		if(Controller.comprovarPersones(tfNumPersones)) {
             			resultatPersones.setIcon(ticReduit);
                 		panell2.add(resultatPersones);
                 	}else {
@@ -475,7 +490,7 @@ public class Visuals extends JFrame{
                 		panell2.add(resultatPersones);
                 	}
             		
-            		if(Funcions.comprovarDni(tfDni) && Funcions.comprovarNom(tfNom) && Funcions.comprovarCognoms(tfCognoms) && Funcions.comprovarNits(tfNumNits) && Funcions.comprovarPersones(tfNumPersones)) {
+            		if(Controller.comprovarDni(tfDni) && Controller.comprovarNom(tfNom) && Controller.comprovarCognoms(tfCognoms) && Controller.comprovarNits(tfNumNits) && Controller.comprovarPersones(tfNumPersones)) {
             			botoReserva.setEnabled(true);
             			panell2.add(botoReserva);
             		}else {
@@ -484,7 +499,7 @@ public class Visuals extends JFrame{
             		}
                 }
             }
-
+            
             @Override
             public void keyTyped(KeyEvent e) {
                 
@@ -499,7 +514,6 @@ public class Visuals extends JFrame{
         
 	}
     
-    
     private void listenerBotoTitle() {
     	
         ActionListener listenerTitle = new ActionListener(){
@@ -507,7 +521,7 @@ public class Visuals extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				setTitle(tfNomHotel.getText());
-				
+				Controller.addTitle(tfNomHotel);
 			}
             
         };
@@ -520,27 +534,33 @@ public class Visuals extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				setTitle(tfNomHotel.getText());
-				
-				if(Funcions.comprovarClient(hotel,  tfDni, tfNom, tfCognoms)) {
+				if(Controller.comprovarData(calendari2)) {
 					
-				Client cli = Funcions.agafarClient(hotel, tfDni, tfNom, tfCognoms);
-				Reserva res = new Reserva();
-				res.setClient(cli);
-				res.setNumPersones(tfNumPersones.getText());
-				res.setLdEntrada(Funcions.dataEntrada(calendari2));
-				model1.addRow(res.arrayReservasPendent());
-				
+					if(Controller.comprovarClient(tfDni, tfNom, tfCognoms)) {
+						
+						String [] arrayRow= Controller.ferReserva(tfDni, tfNom, tfCognoms, tfNumPersones, calendari2, tfNumNits );
+						if(arrayRow[1].equalsIgnoreCase("--")) {
+							
+							JOptionPane.showMessageDialog(null, " No hi han habitacions disponibles amb les caracteristiques indicades anteriorment. ");
+						}else {
+							model1.addRow( new Object[]{arrayRow[0],arrayRow[1],arrayRow[2],arrayRow[3]});
+							System.out.println(" Fer reserva ");
+							JOptionPane.showMessageDialog(null, " S'ha reaservat correctament ");
+						}
+
+					}else {
+						String [] arrayRow= Controller.crearClientReserva(tfDni, tfNom, tfCognoms, tfNumPersones, calendari2, tfNumNits);
+						if(arrayRow[1].equalsIgnoreCase("--")) {
+						
+							JOptionPane.showMessageDialog(null, " No hi han habitacions disponibles amb les caracteristiques indicades anteriorment. ");
+						}else {
+							model1.addRow( new Object[]{arrayRow[0],arrayRow[1],arrayRow[2],arrayRow[3]});
+							System.out.println(" Fer reserva ");
+							JOptionPane.showMessageDialog(null, " S'ha reaservat correctament ");
+						}
+					}
 				}else {
-					Client cli = new Client(tfDni.getText());
-					cli.setNom(tfNom.getText());
-					cli.setCognoms(tfCognoms.getText());
-					hotel.addClient(cli);
-					
-					Reserva res = new Reserva();
-					res.setClient(cli);
-					res.setNumPersones(tfNumPersones.getText());
-					res.setLdEntrada(Funcions.dataEntrada(calendari2));
-					model1.addRow(res.arrayReservasPendent());
+					JOptionPane.showMessageDialog(null, " Comprovi que la data d'entrada sigui correcte. ");
 				}
 				tfDni.setText("");
 				tfNom.setText("");
@@ -549,20 +569,110 @@ public class Visuals extends JFrame{
 				tfNumPersones.setText(null);
 				
 				calendari2 = new JCalendar();
-		    	calendari2.setBounds(40,440,300,250);
-		    	calendari2.setAlignmentX(SwingConstants.CENTER);
-		    	panell2.add(calendari2);
-		    	
-		    	resultatDni.setIcon(null);
+				calendari2.setBounds(40,440,300,250);
+				calendari2.setAlignmentX(SwingConstants.CENTER);
+				panell2.add(calendari2);
+	    	
+				resultatDni.setIcon(null);
 		    	resultatNom.setIcon(null);
 		    	resultatCognoms.setIcon(null);
 		    	resultatNits.setIcon(null);
 		    	resultatPersones.setIcon(null);
+		    	botoReserva.setEnabled(false);
 			}
         };
         botoReserva.addActionListener(listenerReserva);
     }
+    
+    public void listenerHabitació() {
+    	
+    	KeyListener key2 = new KeyListener() {
 
+			@Override
+			public void keyTyped(KeyEvent e) {
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if(e.getComponent().getName().equalsIgnoreCase("numPers")) {
+					if(Controller.comprovarPersones(tfBackPers)) {
+						resultatNumPersones.setIcon(ticReduit);
+						panell3.add(resultatNumPersones);
+					}else {
+						resultatNumPersones.setIcon(xReduit);
+						panell3.add(resultatNumPersones);
+					}
+					if(Controller.comprovarPersones(tfBackPers) && Controller.comprovarHabitació(tfBackNum)){
+						butoGuarda2.setEnabled(true);
+						panell3.add(butoGuarda2);
+					}else {
+						butoGuarda2.setEnabled(false);
+						panell3.add(butoGuarda2);
+					}
+				}else{
+					if(Controller.comprovarHabitació(tfBackNum)) {
+						resultatNumHabitació.setIcon(ticReduit);
+						panell3.add(resultatNumHabitació);
+					}else {
+						resultatNumHabitació.setIcon(xReduit);
+						panell3.add(resultatNumHabitació);
+					}
+				}
+				if(Controller.comprovarPersones(tfBackPers) && Controller.comprovarHabitació(tfBackNum)){
+					butoGuarda2.setEnabled(true);
+					panell3.add(butoGuarda2);
+				}else {
+					butoGuarda2.setEnabled(false);
+					panell3.add(butoGuarda2);
+				}
+			}
+    	};
+    	tfBackNum.addKeyListener(key2);
+    	tfBackPers.addKeyListener(key2);
+    }
     
     
+    public void listenerBotoGuarda2() {
+    	
+    	ActionListener bb = new ActionListener() {
+    		
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				int capacitatActual =Controller.agafarCapacitat(tfBackNum.getText());
+
+				if(Controller.afegirHabitació(tfBackNum.getText(), tfBackPers.getText())==0) {
+
+					JOptionPane.showMessageDialog(null, "L'habitació s'ha afegit correctament. ");
+
+				}else {
+						if(Controller.comrpovarSilaHabEstaReservada(tfBackNum.getText(), tfBackPers.getText())) {
+							JOptionPane.showConfirmDialog(null, "L'habitació en aquest moment està reservada llavors no es poden fer canvis");
+						}else {
+						int opció = JOptionPane.showConfirmDialog(null, "L'habitació amb aquest numero ja existeix. Segur que vols canviar la capacitat? (La capacitat actual és de : "+capacitatActual);
+	
+						switch(opció) {
+						case 0:
+							Controller.actualitzarHabitació(tfBackNum.getText(), tfBackPers.getText());
+							break;
+						case 1:
+							break;
+						case 2:
+							break;
+						}
+					}
+				}
+			    	tfBackPers.setText("");
+			    	tfBackNum.setText("");
+			    	resultatNumHabitació.setIcon(null);
+			    	resultatNumPersones.setIcon(null);
+			    	butoGuarda2.setEnabled(false);
+			}
+    	};
+    	butoGuarda2.addActionListener(bb);
+    }
 }
