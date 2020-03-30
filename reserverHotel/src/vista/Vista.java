@@ -446,13 +446,21 @@ public class Vista extends JFrame{
             public void keyReleased(KeyEvent e) {
             	
             	if(e.getComponent().getName().equalsIgnoreCase("dni")) {
-                	
+
             		if(Controller.comprovarDni(tfDni)) {
+            			Controller.autoCompletarCampsSiExisteix(tfNom, tfDni, tfCognoms);
             			resultatDni.setIcon(ticReduit);
                 		panell2.add(resultatDni);
                 	}else {
                 		resultatDni.setIcon(xReduit);
                 		panell2.add(resultatDni);
+        				tfNom.setEnabled(true);
+        				tfCognoms.setEnabled(true);
+        				tfNom.setText("");
+        				tfCognoms.setText("");
+            			resultatCognoms.setIcon(null);
+            			resultatNom.setIcon(null);
+        				
                 	}
             		
             		if(Controller.comprovarDni(tfDni) && Controller.comprovarNom(tfNom) && Controller.comprovarCognoms(tfCognoms) && Controller.comprovarNits(tfNumNits) && Controller.comprovarPersones(tfNumPersones)) {
@@ -570,7 +578,7 @@ public class Vista extends JFrame{
 				setTitle(tfNomHotel.getText());
 				if(Controller.comprovarData(calendari2)) {
 					
-					if(Controller.comprovarClient(tfDni, tfNom, tfCognoms)) {
+					if(Controller.comprovarClient(tfDni)) {
 						
 						
 						if(Controller.ferReserva(tfDni, tfNom, tfCognoms, tfNumPersones, calendari2, tfNumNits, model1 )) {
@@ -803,7 +811,7 @@ public class Vista extends JFrame{
 
 				@Override
 				public void keyReleased(KeyEvent e) {
-
+					
 					if(tfNomClient.getText().equals("")) {
 						listModel2.clear();
 						lista1.clearSelection();
@@ -833,7 +841,7 @@ public class Vista extends JFrame{
 					}
 				}
     		};
-    		lista1.addListSelectionListener(ll);;
+    		lista1.addListSelectionListener(ll);
     	}
     	
     	
@@ -854,7 +862,6 @@ public class Vista extends JFrame{
 				}
     			
     		};
-    	
     		lista2.addListSelectionListener(triarllistaReserves);	
     	}
     	

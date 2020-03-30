@@ -93,12 +93,12 @@ public class Controller {
 	}
 
 	
-	public static boolean comprovarClient(JTextField tfDni, JTextField tfNom, JTextField tfCognoms) {
+	public static boolean comprovarClient(JTextField tfDni) {
 
 
 		for (Client c : hotel.getAlClients()){
 			
-			if(c.getDni().equalsIgnoreCase(tfDni.getText()) && c.getNom().equalsIgnoreCase(tfNom.getText()) && c.getCognoms().equalsIgnoreCase(tfCognoms.getText())){
+			if(c.getDni().equalsIgnoreCase(tfDni.getText())){
 				return true;
 			}
 		}
@@ -142,9 +142,10 @@ public class Controller {
 			JCalendar calendari2, JTextField nits, DefaultTableModel model1 ) {
 		Reserva res = new Reserva();
 		for (Client c : hotel.getAlClients()){
-			
-			if(c.getDni().equalsIgnoreCase(tfDni.getText()) && c.getNom().equalsIgnoreCase(tfNom.getText()) && c.getCognoms().equalsIgnoreCase(tfCognoms.getText())){
-				
+					
+			if(c.getDni().equalsIgnoreCase(tfDni.getText())){
+				tfNom.setText(c.getNom());
+				tfCognoms.setText(c.getCognoms());
 				res.setClient(c);
 				res.setNumPersones(tfNumPersones.getText());
 				res.setLdEntrada(Controller.dataEntrada(calendari2));
@@ -332,7 +333,6 @@ public class Controller {
 			
 			listModel1.addElement(cc);
 		}
-		
 	}
 
 	public static void cercarR(Client client, DefaultListModel<Reserva> listModel2) {
@@ -371,5 +371,20 @@ public class Controller {
 			i++;
 		}
 	//}
+	}
+
+	public static void autoCompletarCampsSiExisteix(JTextField tfNom, JTextField tfDni, JTextField tfCognoms) {
+		for(Client cc : hotel.getAlClients()) {
+			if(cc.getDni().equals(tfDni.getText())) {
+				tfNom.setText(cc.getNom());
+				tfCognoms.setText(cc.getCognoms());
+				tfNom.setEnabled(false);
+				tfCognoms.setEnabled(false);
+			}else {
+				tfNom.setEnabled(true);
+				tfCognoms.setEnabled(true);
+			}
+		}
+		
 	}
 }
