@@ -3,15 +3,17 @@ package controller;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Vector;
+import java.time.temporal.ChronoUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.JLabel;
+import javax.swing.DefaultListModel;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
+import javax.swing.table.DefaultTableModel;
 
 import com.toedter.calendar.JCalendar;
+import com.toedter.calendar.JDateChooser;
 
 import model.*;
 
@@ -106,6 +108,7 @@ public class Controller {
 	public static LocalDate dataEntrada(JCalendar calendari2) {
 		
 		Long dataNano = calendari2.getDate().getTime();
+		
         LocalDate data = Instant.ofEpochMilli(dataNano).atZone(ZoneId.systemDefault()).toLocalDate();
         return data;
 	}
@@ -115,8 +118,19 @@ public class Controller {
 		Long dataNano = calendari2.getDate().getTime();
 		
         LocalDate data = Instant.ofEpochMilli(dataNano).atZone(ZoneId.systemDefault()).toLocalDate();
-        data.plusDays(Integer.parseInt(nits.getText()));
-        return data;
+        
+        System.out.println("#########################");
+        System.out.println("Data abans--> "+ data);
+        System.out.println("#########################");
+        
+        LocalDate data2=data.plus(Integer.parseInt(nits.getText()), ChronoUnit.DAYS);
+        
+        
+        System.out.println("nits --> "+ nits.getText());
+        System.out.println("#########################");
+        System.out.println("Data despres--> "+ data2);
+        System.out.println("#########################");
+        return data2;
 	}
 
 	public static void addTitle(JTextField tfNomHotel) {
@@ -124,8 +138,8 @@ public class Controller {
 	}
 
 	
-	public static String[] ferReserva(JTextField tfDni, JTextField tfNom, JTextField tfCognoms, JTextField tfNumPersones,
-			JCalendar calendari2, JTextField nits ) {
+	public static boolean ferReserva(JTextField tfDni, JTextField tfNom, JTextField tfCognoms, JTextField tfNumPersones,
+			JCalendar calendari2, JTextField nits, DefaultTableModel model1 ) {
 		Reserva res = new Reserva();
 		for (Client c : hotel.getAlClients()){
 			
@@ -138,22 +152,24 @@ public class Controller {
 				if(hotel.buscarHabitació(res)) {
 					System.out.println(" Buscar habitació1");
 					hotel.getAlReservesPendents().add(res);
-					return res.arrayReservasPendent();
+					
+					Controller.buidarIOmplirTaulaReservesPendents(model1);
+
+					return true;
 				}
 			}
 		}
-		String [] xd = {"--","--","--","--"};
-		return xd;		
+		return false;		
 	}
 	
-	public static String[] crearClientReserva(JTextField tfDni, JTextField tfNom, JTextField tfCognoms, JTextField tfNumPersones,
-			JCalendar calendari2, JTextField nits) {
+	public static boolean crearClientReserva(JTextField tfDni, JTextField tfNom, JTextField tfCognoms, JTextField tfNumPersones,
+			JCalendar calendari2, JTextField nits, DefaultTableModel model1) {
 		
 		Client cli = new Client(tfDni.getText());
 		cli.setNom(tfNom.getText());
 		cli.setCognoms(tfCognoms.getText());
-		hotel.addClient(cli);
-		hotel.getAlClients().add(cli);
+
+		System.out.println("Aclient");
 		
 		Reserva res = new Reserva();
 		res.setClient(cli);
@@ -161,12 +177,14 @@ public class Controller {
 		res.setLdEntrada(Controller.dataEntrada(calendari2));
 		res.setLdSortida(Controller.dataSortida(calendari2, nits));
 		if(hotel.buscarHabitació(res)) {
+			hotel.getAlClients().add(cli);
 			System.out.println(" Buscar habitació2");
-			hotel.getAlReservesPendents().add(res);
-			return res.arrayReservasPendent();
+			hotel.getAlReservesPendents().add(res);			
+			Controller.buidarIOmplirTaulaReservesPendents(model1);
+
+			return true;
 		}
-		 String [] xd = {"--","--","--","--"};
-		return xd;	
+		return false;	
 	}
 
 	public static boolean comprovarHabitació(JTextField tfBackPers) {
@@ -239,12 +257,119 @@ public class Controller {
 		return true;
 	}
 
+	public static void comfirmarLaReserva(int row) {
 
+		hotel.getAlReservesConfirmades().add(hotel.getAlReservesPendents().get(row));
+		hotel.getAlReservesPendents().remove(row);
+	}
 
+	public static void borrarReservaPendent(int row) {
 
-	
-	
+		hotel.getAlReservesPendents().remove(row);
+	}
 
+	public static void posarReservaAComfirmades() {
+		
+	}
 	
+	public static void buidarIOmplirTaulaReservesPendents(DefaultTableModel model) {
+		model.setRowCount(0);
+		for (Reserva rr : hotel.getAlReservesPendents()) {
+			model.addRow(rr.arrayReservasPendent());
+		}			
+	}
+
+	public static void toggleNoSelecionat(JDateChooser calendari1, DefaultTableModel model2) {
+		
+		Long data = calendari1.getDate().getTime();
+		LocalDate ld = Instant.ofEpochMilli(data).atZone(ZoneId.systemDefault()).toLocalDate();
+		model2.setRowCount(0);
+		
+		for(Reserva rr: hotel.getAlReservesConfirmades()) {
+			System.out.println("En el for per comprovar si funciona entrada");
+			if(rr.getLdEntrada().isEqual(ld)) {
+				
+				System.out.println("la comparació funciona entrada");
+				model2.addRow(rr.arrayReservasComfirmades());
+			}
+		}
+	}
 	
+	public static void toggleSelecionat(JDateChooser calendari1, DefaultTableModel model2) {
+		
+		Long data = calendari1.getDate().getTime();
+		LocalDate ld = Instant.ofEpochMilli(data).atZone(ZoneId.systemDefault()).toLocalDate();
+		model2.setRowCount(0);
+		
+		for(Reserva rr: hotel.getAlReservesConfirmades()) {
+			System.out.println("En el for per comprovar si funciona sortida");
+			System.out.println(rr.getLdSortida()+"        "+ld);
+			if(rr.getLdSortida().isEqual(ld)) {
+				
+				System.out.println("la comparació funcionzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzza sortida");
+				model2.addRow(rr.arrayReservasComfirmades());
+			}
+		}
+	}
+
+	public static void ferUpdateAlaTaula(JDateChooser calendari1, DefaultTableModel model2, JToggleButton toggle) {
+		
+		if(toggle.isSelected()) {
+			System.out.println(" funciona1");
+			 toggleSelecionat(calendari1, model2);
+		}else {
+			System.out.println("Funciona2");
+			toggleNoSelecionat( calendari1,  model2);
+		}
+	}
+
+	public static void cercar(String text, DefaultListModel<Client> listModel1) {
+
+			listModel1.clear();
+			
+		for(Client cc : hotel.cercarClients(text)) {
+			System.out.println("A controller");
+			
+			listModel1.addElement(cc);
+		}
+		
+	}
+
+	public static void cercarR(Client client, DefaultListModel<Reserva> listModel2) {
+		
+		listModel2.clear();
+		
+			for(Reserva rr : hotel.cercarReservas(client)) {
+				
+				listModel2.addElement(rr);
+			}
+		}
+
+	public static void borrarReserva(Reserva reservaABorrar) {
+		
+		Reserva res = reservaABorrar;
+		int i=0;
+	//if(hotel.getAlReservesConfirmades().size()>0) {
+		for(Reserva rr : hotel.getAlReservesConfirmades()) {
+			if(rr.getLdEntrada()==res.getLdEntrada() && rr.getLdSortida()==res.getLdSortida() && rr.getNumHabitació()==res.getNumHabitació() && rr.getClient().getDni().equals(res.getClient().getDni())) {
+
+				hotel.removeValueOfArrayList(hotel.getAlReservesConfirmades(), i);
+				break;
+			}
+			i++;
+		}
+	//}
+
+	//if(hotel.getAlReservesConfirmades().size()>0) {
+		i=0;	
+		for(Reserva rr : hotel.getAlReservesPendents()) {
+			if(rr.getLdEntrada()==res.getLdEntrada() && rr.getLdSortida()==res.getLdSortida() && rr.getNumHabitació().equals(res.getNumHabitació()) && rr.getClient().getDni()==res.getClient().getDni()) {
+
+				hotel.removeValueOfArrayList(hotel.getAlReservesPendents(), i);
+				break;
+			}
+			i++;
+		}
+	//}
+	}
 }

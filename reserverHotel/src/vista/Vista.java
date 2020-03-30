@@ -6,6 +6,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.sql.Date;
+import java.time.LocalDate;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -19,8 +25,11 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 import com.toedter.calendar.JCalendar;
@@ -46,6 +55,7 @@ public class Vista extends JFrame{
 	JTable taula2;
 	JScrollPane scroll2;
 	JDateChooser calendari1;
+	JToggleButton toggle;
 	
 	JPanel panell2;
 	JLabel titolP2;
@@ -62,7 +72,7 @@ public class Vista extends JFrame{
 	JTextField tfNumNits;
 	JCalendar calendari2;
 	JButton botoReserva;
-	
+	JButton botoBorrar;
 	
 	JPanel panell3;
 	JLabel titolP3;
@@ -79,11 +89,13 @@ public class Vista extends JFrame{
 	JTextField tfNomClient;
 	JButton butoGuarda1;
 	JButton butoGuarda2;
-	JList lista1;
-	DefaultListModel listModel1;
-	JScrollPane scroll3;
-	JList lista2;
-	DefaultListModel listModel2;
+	
+	
+	JList<Client> lista1;
+	DefaultListModel<Client> listModel1;
+	
+	JList<Reserva> lista2;
+	DefaultListModel<Reserva> listModel2;
 	
 	JLabel resultatDni;
 	JLabel resultatNom;
@@ -121,6 +133,13 @@ public class Vista extends JFrame{
     	listenerBotoReserva();
     	listenerHabitació();
     	listenerBotoGuarda2();
+    	listenerDobleClick();
+    	toggleListener();
+    	dateChooserListener();
+    	cercadorListener();
+    	cercadorReservesListener();
+    	perBorrarReservesListener();
+    	botoEliminaListener();
     }
     
 	private void posarPanells() {
@@ -176,18 +195,26 @@ public class Vista extends JFrame{
     	
     	text2P1 = new JLabel();
     	text2P1.setText("Reserves confirmades: ");
-    	text2P1.setBounds(20,420,180,40);
+    	text2P1.setBounds(20,380,180,40);
     	text2P1.setFont(new Font("Arial", Font.BOLD, 12));
     	panell1.add(text2P1);
     	
+    	toggle = new JToggleButton();
+    	toggle.setBounds(20, 430, 130, 30);
+    	toggle.setText("Etrada");
+    	panell1.add(toggle);
+    	
     	calendari1 = new JDateChooser();
-    	calendari1.setBounds(220,430,120,25);
+    	calendari1.setBounds(220,430,130,30);
+    	long currentMilliseconds = System.currentTimeMillis();
+		Date result = new Date(currentMilliseconds); 
+		calendari1.setDate(result);
     	panell1.add(calendari1);
     	
     	model2 = new DefaultTableModel();
-    	model2.addColumn("Nom");
-        model2.addColumn("Date In");
-        model2.addColumn("Date Out");
+    	model2.addColumn("Dni");
+        model2.addColumn("Nom");
+        model2.addColumn("Cognoms");
         model2.addColumn("Habitació");
     	taula2 = new JTable (model2);
     	taula2.setBounds(20,480,300,200);
@@ -198,6 +225,7 @@ public class Vista extends JFrame{
     	scroll2 = new JScrollPane(taula2,ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     	scroll2.setBounds(20,480,350,250);
     	panell1.add(scroll2);
+    	
     }
     
     private void modificacionsPanell2() {
@@ -397,6 +425,12 @@ public class Vista extends JFrame{
     	 panell3.add(lista2);
     	 listenerBotoTitle();
     	 
+    	 botoBorrar = new JButton();
+    	 botoBorrar.setBounds(150,750,100,30);
+    	 botoBorrar.setText("Eliminar");
+    	 botoBorrar.setEnabled(false);
+    	 panell3.add(botoBorrar);
+    	 
     }
       
     private void listener2() {
@@ -538,29 +572,29 @@ public class Vista extends JFrame{
 					
 					if(Controller.comprovarClient(tfDni, tfNom, tfCognoms)) {
 						
-						String [] arrayRow= Controller.ferReserva(tfDni, tfNom, tfCognoms, tfNumPersones, calendari2, tfNumNits );
-						if(arrayRow[1].equalsIgnoreCase("--")) {
-							
-							JOptionPane.showMessageDialog(null, " No hi han habitacions disponibles amb les caracteristiques indicades anteriorment. ");
-						}else {
-							model1.addRow( new Object[]{arrayRow[0],arrayRow[1],arrayRow[2],arrayRow[3]});
+						
+						if(Controller.ferReserva(tfDni, tfNom, tfCognoms, tfNumPersones, calendari2, tfNumNits, model1 )) {
 							System.out.println(" Fer reserva ");
 							JOptionPane.showMessageDialog(null, " S'ha reaservat correctament ");
+							
+						}else {
+							JOptionPane.showMessageDialog(null, " No hi han habitacions disponibles amb les caracteristiques indicades anteriorment. ");
+							
 						}
 
 					}else {
-						String [] arrayRow= Controller.crearClientReserva(tfDni, tfNom, tfCognoms, tfNumPersones, calendari2, tfNumNits);
-						if(arrayRow[1].equalsIgnoreCase("--")) {
-						
-							JOptionPane.showMessageDialog(null, " No hi han habitacions disponibles amb les caracteristiques indicades anteriorment. ");
-						}else {
-							model1.addRow( new Object[]{arrayRow[0],arrayRow[1],arrayRow[2],arrayRow[3]});
+						if(Controller.crearClientReserva(tfDni, tfNom, tfCognoms, tfNumPersones, calendari2, tfNumNits, model1)) {
 							System.out.println(" Fer reserva ");
 							JOptionPane.showMessageDialog(null, " S'ha reaservat correctament ");
+						}else {
+							JOptionPane.showMessageDialog(null, " No hi han habitacions disponibles amb les caracteristiques indicades anteriorment. ");
+							
+						
+
 						}
 					}
 				}else {
-					JOptionPane.showMessageDialog(null, " Comprovi que la data d'entrada sigui correcte. ");
+					JOptionPane.showMessageDialog(null, " Comprovi que la data d'entrada no sigui menor a la d'avui. ");
 				}
 				tfDni.setText("");
 				tfNom.setText("");
@@ -568,16 +602,18 @@ public class Vista extends JFrame{
 				tfNumNits.setText(null);
 				tfNumPersones.setText(null);
 				
-				calendari2 = new JCalendar();
-				calendari2.setBounds(40,440,300,250);
-				calendari2.setAlignmentX(SwingConstants.CENTER);
-				panell2.add(calendari2);
+				long currentMilliseconds = System.currentTimeMillis();
+				Date result = new Date(currentMilliseconds); 
+				calendari2.setDate(result);
+				
+				
 	    	
 				resultatDni.setIcon(null);
 		    	resultatNom.setIcon(null);
 		    	resultatCognoms.setIcon(null);
 		    	resultatNits.setIcon(null);
 		    	resultatPersones.setIcon(null);
+		    	
 		    	botoReserva.setEnabled(false);
 			}
         };
@@ -671,8 +707,185 @@ public class Vista extends JFrame{
 			    	resultatNumHabitació.setIcon(null);
 			    	resultatNumPersones.setIcon(null);
 			    	butoGuarda2.setEnabled(false);
+			    	
 			}
     	};
     	butoGuarda2.addActionListener(bb);
     }
+    
+    
+    	public void listenerDobleClick() {
+    		
+    		taula1.addMouseListener(new MouseAdapter(){
+    		    @Override
+    		    public void mouseClicked(MouseEvent e){
+    		        if(e.getClickCount()==2){
+    		        	System.out.println("doble click");
+    		        	 int row = taula1.rowAtPoint(e.getPoint());
+    		             System.out.println("You clicked at row " + row);
+    		            int opció= JOptionPane.showOptionDialog(null, "Finestra de confirmació", "Tria que vols fer amb aquesta reserva.", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[]{"Comfirmar-la", "Descartar-la", "Cancelar"},"default");
+    		            
+    		            switch(opció) {
+    		            	case 0:
+    		            		JOptionPane.showMessageDialog(null, "La reserva pendent d'ha confirmat correctament");
+    		            		Controller.comfirmarLaReserva(row);
+    		            		Controller.posarReservaAComfirmades();
+    		            		Controller.buidarIOmplirTaulaReservesPendents(model1);
+
+    		            		break;
+    		            	case 1:
+    		            		Controller.borrarReservaPendent(row);
+    		            		Controller.buidarIOmplirTaulaReservesPendents(model1);
+    		            		break;
+    		            	case 2:
+    		            		break;
+    		            }
+    		        }
+    				model2.setRowCount(0);
+    				if(toggle.isSelected()) {
+    					toggle.setText("Sortida");
+    					System.out.println("Esta selecionat(Sortida)");
+    					Controller.toggleSelecionat(calendari1,  model2);
+    				}else {
+    					toggle.setText("Entrada");
+    					System.out.println("No esta selecionat(Entrada)");
+    					Controller.toggleNoSelecionat(calendari1, model2);
+    				}
+    		    }  
+    	});   		
+    }
+    	
+    	public void toggleListener() {
+    		
+    		ActionListener key = new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					model2.setRowCount(0);
+					if(toggle.isSelected()) {
+						toggle.setText("Sortida");
+						System.out.println("Esta selecionat(Sortida)");
+						Controller.toggleSelecionat(calendari1,  model2);
+					}else {
+						toggle.setText("Entrada");
+						System.out.println("No esta selecionat(Entrada)");
+						Controller.toggleNoSelecionat(calendari1, model2);
+					}
+				}
+    		};
+    		toggle.addActionListener(key);
+    	}
+    	
+    	public void dateChooserListener() {
+    		
+    		PropertyChangeListener ll = new PropertyChangeListener() {
+
+				@Override
+				public void propertyChange(PropertyChangeEvent evt) {
+
+					Controller.ferUpdateAlaTaula(calendari1, model2, toggle);
+				}
+    		};
+    		calendari1.addPropertyChangeListener(ll);
+    	}
+    	
+    
+    	public void cercadorListener() {
+    		KeyListener key3 = new KeyListener() {
+
+				@Override
+				public void keyTyped(KeyEvent e) {			
+				}
+
+				@Override
+				public void keyPressed(KeyEvent e) {
+				}
+
+				@Override
+				public void keyReleased(KeyEvent e) {
+
+					if(tfNomClient.getText().equals("")) {
+						listModel2.clear();
+						lista1.clearSelection();
+						listModel1.clear();
+					}else {
+						listModel2.clear();
+						listModel1.clear();
+						
+						Controller.cercar(tfNomClient.getText(), listModel1);
+					}
+				}
+    		};
+    		tfNomClient.addKeyListener(key3);
+    		
+    	}
+    	
+    	
+    	public void cercadorReservesListener() {
+    		
+    		ListSelectionListener ll = new ListSelectionListener() {
+
+				@Override
+				public void valueChanged(ListSelectionEvent e) {
+
+					if(e.getValueIsAdjusting()) {
+						Controller.cercarR(lista1.getSelectedValue(),listModel2);	
+					}
+				}
+    		};
+    		lista1.addListSelectionListener(ll);;
+    	}
+    	
+    	
+    	
+    	public void perBorrarReservesListener() {
+    		ListSelectionListener triarllistaReserves = new ListSelectionListener() {
+
+				@Override
+				public void valueChanged(ListSelectionEvent e) {
+					
+					if(e.getValueIsAdjusting()) {
+						if(lista2.isSelectionEmpty()) {
+							botoBorrar.setEnabled(false);
+						}else {
+							botoBorrar.setEnabled(true);
+						}
+					}
+				}
+    			
+    		};
+    	
+    		lista2.addListSelectionListener(triarllistaReserves);	
+    	}
+    	
+    	public void botoEliminaListener() {
+    		
+    		ActionListener eliminar = new ActionListener(){
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					
+					int opció = JOptionPane.showConfirmDialog(null, "Segur que vols eliminar la seguent reserva? ");
+					switch(opció) {
+					
+					case 0:
+						JOptionPane.showMessageDialog(null, "S'ha eliminat la reserva correctament ");
+						Controller.borrarReserva(lista2.getSelectedValue());
+						listModel2.remove(lista2.getSelectedIndex());
+						Controller.ferUpdateAlaTaula(calendari1, model2, toggle);
+						Controller.buidarIOmplirTaulaReservesPendents(model1);
+						break;
+					case 1:
+						
+						break;
+					case 2:
+					
+						break;
+					}
+
+				}
+    			
+    		};
+    		botoBorrar.addActionListener(eliminar);    		
+    	}
 }

@@ -85,6 +85,50 @@ public class Hotel {
 		}
 		return false;
 	}
+	
+	public ArrayList<Client> cercarClients(String text){
+		
+		ArrayList<Client> arrayListClients = new ArrayList<Client>();
+		
+		for(Client c : this.getAlClients()) {
+			if(c.getNom().toLowerCase().contains(text.toLowerCase()) || c.getCognoms().toLowerCase().contains(text.toLowerCase()) || c.getDni().toLowerCase().contains(text.toLowerCase())) {
+				System.out.println("a hotel");
+				arrayListClients.add(c);
+			}
+		}
+		return arrayListClients;
+	}
+	
+	
+	public ArrayList<Reserva> cercarReservas(Client c){
+		
+		ArrayList<Reserva> arrayListReservas = new ArrayList<Reserva>();
+		
+		
+			for(Reserva r : this.getAlReservesPendents()) {
+				if(c.getNom().toLowerCase().contains(r.getClient().getNom().toLowerCase()) || c.getCognoms().toLowerCase().contains(r.getClient().getCognoms().toLowerCase()) ||
+						c.getDni().toLowerCase().contains(r.getClient().getDni().toLowerCase())) {
+					arrayListReservas.add(r);
+				}
+			}
+
+			for(Reserva rr : this.getAlReservesConfirmades()) {
+				if(c.getNom().toLowerCase().contains(rr.getClient().getNom().toLowerCase()) || c.getCognoms().toLowerCase().contains(rr.getClient().getCognoms().toLowerCase()) ||
+						c.getDni().toLowerCase().contains(rr.getClient().getDni().toLowerCase())) {
+					arrayListReservas.add(rr);
+				}
+			}
+		
+
+		return arrayListReservas;
+
+	}
+
+	public void removeValueOfArrayList(ArrayList<Reserva> alAborrar, int i) {
+		
+		alAborrar.remove(i);
+		
+	}
 
 	
 	

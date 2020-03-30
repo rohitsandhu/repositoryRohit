@@ -33,7 +33,10 @@ public class Client {
 	public void setCognoms(String cognoms) {
 		Cognoms = cognoms;
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		return this.getNom().substring(0,1).toUpperCase()+".  "+this.getCognoms()+" - "+this.getDni();
+	}
 	
 }
