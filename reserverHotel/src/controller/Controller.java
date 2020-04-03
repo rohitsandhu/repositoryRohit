@@ -20,9 +20,15 @@ import model.*;
 
 public class Controller {
 
-	static Hotel hotel = new Hotel("HOTEL");
+	private Hotel hotel;
+	private Fitxer fitxer;
 	
-	public static boolean comprovarDni(JTextField tfDni) {
+	public Controller() {
+		hotel = new Hotel("HOTEL");
+		fitxer = new Fitxer();
+	}
+	
+	public boolean comprovarDni(JTextField tfDni) {
 		
 		    boolean resultat = false;
 
@@ -53,7 +59,7 @@ public class Controller {
 		    return resultat;
 	}
 
-	public static boolean comprovarNom(JTextField tfNom) {
+	public boolean comprovarNom(JTextField tfNom) {
 		
 		if(tfNom.getText().matches("^[ A-Za-zñÑáéíóúÁÉÍÓÚàèìòùÀÈÌÒÙÇç]+$")) {
 			return true;
@@ -62,7 +68,7 @@ public class Controller {
 		}
 	}
 
-	public static boolean comprovarCognoms(JTextField tfCognoms) {
+	public  boolean comprovarCognoms(JTextField tfCognoms) {
 		
 		if(tfCognoms.getText().matches("^[ A-Za-zñÑáéíóúÁÉÍÓÚàèìòùÀÈÌÒÙÇç]+$")) {
 			return true;
@@ -71,7 +77,7 @@ public class Controller {
 		}
 	}
 
-	public static boolean comprovarNits(JTextField tfNumNits) {	
+	public boolean comprovarNits(JTextField tfNumNits) {	
 		if(tfNumNits.getText().matches("\\d+")) {
 			if(Integer.parseInt(tfNumNits.getText()) > 0 && Integer.parseInt(tfNumNits.getText()) <31) {
 				return true;
@@ -82,7 +88,7 @@ public class Controller {
 		return false;
 	}
 
-	public static boolean comprovarPersones(JTextField tfNumPersones) {
+	public boolean comprovarPersones(JTextField tfNumPersones) {
 		
 		if(tfNumPersones.getText().matches("\\d+")) {
 			if(Integer.parseInt(tfNumPersones.getText()) > 0 && Integer.parseInt(tfNumPersones.getText()) <11) {
@@ -93,7 +99,7 @@ public class Controller {
 	}
 
 	
-	public static boolean comprovarClient(JTextField tfDni) {
+	public boolean comprovarClient(JTextField tfDni) {
 
 
 		for (Client c : hotel.getAlClients()){
@@ -105,7 +111,7 @@ public class Controller {
 		return false;	
 	}
 	
-	public static LocalDate dataEntrada(JCalendar calendari2) {
+	public LocalDate dataEntrada(JCalendar calendari2) {
 		
 		Long dataNano = calendari2.getDate().getTime();
 		
@@ -113,7 +119,7 @@ public class Controller {
         return data;
 	}
 	
-	public static LocalDate dataSortida(JCalendar calendari2, JTextField nits) {
+	public LocalDate dataSortida(JCalendar calendari2, JTextField nits) {
 		
 		Long dataNano = calendari2.getDate().getTime();
 		
@@ -133,12 +139,12 @@ public class Controller {
         return data2;
 	}
 
-	public static void addTitle(JTextField tfNomHotel) {
+	public void addTitle(JTextField tfNomHotel) {
 		hotel.setNomHotel(tfNomHotel.getText());
 	}
 
 	
-	public static boolean ferReserva(JTextField tfDni, JTextField tfNom, JTextField tfCognoms, JTextField tfNumPersones,
+	public boolean ferReserva(JTextField tfDni, JTextField tfNom, JTextField tfCognoms, JTextField tfNumPersones,
 			JCalendar calendari2, JTextField nits, DefaultTableModel model1 ) {
 		Reserva res = new Reserva();
 		for (Client c : hotel.getAlClients()){
@@ -148,13 +154,15 @@ public class Controller {
 				tfCognoms.setText(c.getCognoms());
 				res.setClient(c);
 				res.setNumPersones(tfNumPersones.getText());
-				res.setLdEntrada(Controller.dataEntrada(calendari2));
-				res.setLdSortida(Controller.dataSortida(calendari2, nits));
+				res.setLdEntrada(dataEntrada(calendari2));
+				res.setLdSortida(dataSortida(calendari2, nits));
 				if(hotel.buscarHabitació(res)) {
 					System.out.println(" Buscar habitació1");
 					hotel.getAlReservesPendents().add(res);
 					
-					Controller.buidarIOmplirTaulaReservesPendents(model1);
+					fitxer.omplirFitxerReservesPendents(res);
+					
+					buidarIOmplirTaulaReservesPendents(model1);
 
 					return true;
 				}
@@ -163,7 +171,7 @@ public class Controller {
 		return false;		
 	}
 	
-	public static boolean crearClientReserva(JTextField tfDni, JTextField tfNom, JTextField tfCognoms, JTextField tfNumPersones,
+	public boolean crearClientReserva(JTextField tfDni, JTextField tfNom, JTextField tfCognoms, JTextField tfNumPersones,
 			JCalendar calendari2, JTextField nits, DefaultTableModel model1) {
 		
 		Client cli = new Client(tfDni.getText());
@@ -175,20 +183,23 @@ public class Controller {
 		Reserva res = new Reserva();
 		res.setClient(cli);
 		res.setNumPersones(tfNumPersones.getText());
-		res.setLdEntrada(Controller.dataEntrada(calendari2));
-		res.setLdSortida(Controller.dataSortida(calendari2, nits));
+		res.setLdEntrada(dataEntrada(calendari2));
+		res.setLdSortida(dataSortida(calendari2, nits));
 		if(hotel.buscarHabitació(res)) {
 			hotel.getAlClients().add(cli);
+			fitxer.afegirClient(cli);
 			System.out.println(" Buscar habitació2");
-			hotel.getAlReservesPendents().add(res);			
-			Controller.buidarIOmplirTaulaReservesPendents(model1);
+			hotel.getAlReservesPendents().add(res);
+			fitxer.omplirFitxerReservesPendents(res);
+
+			buidarIOmplirTaulaReservesPendents(model1);
 
 			return true;
 		}
 		return false;	
 	}
 
-	public static boolean comprovarHabitació(JTextField tfBackPers) {
+	public boolean comprovarHabitació(JTextField tfBackPers) {
 		
 		if(tfBackPers.getText().matches("\\d+")) {
 			return true;
@@ -196,7 +207,7 @@ public class Controller {
 		return false;
 	}
 
-	public static int afegirHabitació(String numHab, String numPersones) {
+	public int afegirHabitació(String numHab, String numPersones) {
 		
 		for (Habitació hh : hotel.getAlHabitació()) {
 			if(hh.getNumHabitació()==Integer.parseInt(numHab) && hh.getNumPersones()==Integer.parseInt(numPersones) || 
@@ -211,10 +222,11 @@ public class Controller {
 		h.setNumPersones(Integer.parseInt(numPersones));
 		hotel.getAlHabitació().add(h);
 		System.out.println(" num:" + numHab+" pes:"+numPersones);
+		fitxer.afegirHabitació(h);
 		return 0;
 	}
 
-	public static int agafarCapacitat(String numHab) {
+	public int agafarCapacitat(String numHab) {
 	
 		for (Habitació hh : hotel.getAlHabitació()) {
 			if(Integer.parseInt(numHab)==hh.getNumHabitació()) {
@@ -224,16 +236,17 @@ public class Controller {
 		return 0;
 	}
 
-	public static void actualitzarHabitació(String numHab, String numPers) {
+	public void actualitzarHabitació(String numHab, String numPers) {
 		
 		for (Habitació hh : hotel.getAlHabitació()) {
 			if(Integer.parseInt(numHab)==hh.getNumHabitació()) {
 				hh.setNumPersones(Integer.parseInt(numPers));
+				fitxer.actualitzarHabitació(hotel.getAlHabitació(), hh);
 			}
 		}		
 	}
 
-	public static boolean comrpovarSilaHabEstaReservada(String numHab, String numPers) {
+	public boolean comrpovarSilaHabEstaReservada(String numHab, String numPers) {
 			
 		for (Reserva rr : hotel.getAlReservesPendents()) {
 			if(Integer.parseInt(numHab)==Integer.parseInt(rr.getNumHabitació())) {
@@ -248,7 +261,7 @@ public class Controller {
 		return false;
 	}
 
-	public static boolean comprovarData(JCalendar calendari2) {
+	public boolean comprovarData(JCalendar calendari2) {
 		
 		Long dataNano = calendari2.getDate().getTime();
         LocalDate data = Instant.ofEpochMilli(dataNano).atZone(ZoneId.systemDefault()).toLocalDate();
@@ -258,29 +271,31 @@ public class Controller {
 		return true;
 	}
 
-	public static void comfirmarLaReserva(int row) {
+	public void comfirmarLaReserva(int row) {
 
 		hotel.getAlReservesConfirmades().add(hotel.getAlReservesPendents().get(row));
+		fitxer.passarReservaConfirmadaAlFitxer(hotel.getAlReservesPendents().get(row));
+		fitxer.borrarReservaPendent(hotel.getAlReservesPendents().get(row));
 		hotel.getAlReservesPendents().remove(row);
-	}
-
-	public static void borrarReservaPendent(int row) {
-
-		hotel.getAlReservesPendents().remove(row);
-	}
-
-	public static void posarReservaAComfirmades() {
 		
+
 	}
+
+	public void borrarReservaPendent(int row) {
+
+		hotel.getAlReservesPendents().remove(row);
+		fitxer.borrarReservaPendent(hotel.getAlReservesPendents().get(row));
+	}
+
 	
-	public static void buidarIOmplirTaulaReservesPendents(DefaultTableModel model) {
+	public void buidarIOmplirTaulaReservesPendents(DefaultTableModel model) {
 		model.setRowCount(0);
 		for (Reserva rr : hotel.getAlReservesPendents()) {
 			model.addRow(rr.arrayReservasPendent());
 		}			
 	}
 
-	public static void toggleNoSelecionat(JDateChooser calendari1, DefaultTableModel model2) {
+	public void toggleNoSelecionat(JDateChooser calendari1, DefaultTableModel model2) {
 		
 		Long data = calendari1.getDate().getTime();
 		LocalDate ld = Instant.ofEpochMilli(data).atZone(ZoneId.systemDefault()).toLocalDate();
@@ -296,7 +311,7 @@ public class Controller {
 		}
 	}
 	
-	public static void toggleSelecionat(JDateChooser calendari1, DefaultTableModel model2) {
+	public void toggleSelecionat(JDateChooser calendari1, DefaultTableModel model2) {
 		
 		Long data = calendari1.getDate().getTime();
 		LocalDate ld = Instant.ofEpochMilli(data).atZone(ZoneId.systemDefault()).toLocalDate();
@@ -313,7 +328,7 @@ public class Controller {
 		}
 	}
 
-	public static void ferUpdateAlaTaula(JDateChooser calendari1, DefaultTableModel model2, JToggleButton toggle) {
+	public void ferUpdateAlaTaula(JDateChooser calendari1, DefaultTableModel model2, JToggleButton toggle) {
 		
 		if(toggle.isSelected()) {
 			System.out.println(" funciona1");
@@ -324,7 +339,7 @@ public class Controller {
 		}
 	}
 
-	public static void cercar(String text, DefaultListModel<Client> listModel1) {
+	public void cercar(String text, DefaultListModel<Client> listModel1) {
 
 			listModel1.clear();
 			
@@ -335,7 +350,7 @@ public class Controller {
 		}
 	}
 
-	public static void cercarR(Client client, DefaultListModel<Reserva> listModel2) {
+	public void cercarR(Client client, DefaultListModel<Reserva> listModel2) {
 		
 		listModel2.clear();
 		
@@ -345,37 +360,38 @@ public class Controller {
 			}
 		}
 
-	public static void borrarReserva(Reserva reservaABorrar) {
+	public void borrarReserva(Reserva reservaABorrar) {
 		
 		Reserva res = reservaABorrar;
 		int i=0;
-	//if(hotel.getAlReservesConfirmades().size()>0) {
+
 		for(Reserva rr : hotel.getAlReservesConfirmades()) {
 			if(rr.getLdEntrada()==res.getLdEntrada() && rr.getLdSortida()==res.getLdSortida() && rr.getNumHabitació()==res.getNumHabitació() && rr.getClient().getDni().equals(res.getClient().getDni())) {
-
+				
+				fitxer.borrarReservaComfirmada(rr);
 				hotel.removeValueOfArrayList(hotel.getAlReservesConfirmades(), i);
+				
 				break;
 			}
 			i++;
 		}
-	//}
 
-	//if(hotel.getAlReservesConfirmades().size()>0) {
+
 		i=0;	
 		for(Reserva rr : hotel.getAlReservesPendents()) {
 			if(rr.getLdEntrada()==res.getLdEntrada() && rr.getLdSortida()==res.getLdSortida() && rr.getNumHabitació().equals(res.getNumHabitació()) && rr.getClient().getDni()==res.getClient().getDni()) {
 
 				hotel.removeValueOfArrayList(hotel.getAlReservesPendents(), i);
+				fitxer.borrarReservaPendent(rr);
 				break;
 			}
 			i++;
 		}
-	//}
 	}
 
-	public static void autoCompletarCampsSiExisteix(JTextField tfNom, JTextField tfDni, JTextField tfCognoms) {
+	public void autoCompletarCampsSiExisteix(JTextField tfNom, JTextField tfDni, JTextField tfCognoms) {
 		for(Client cc : hotel.getAlClients()) {
-			if(cc.getDni().equals(tfDni.getText())) {
+			if(cc.getDni().equalsIgnoreCase(tfDni.getText())) {
 				tfNom.setText(cc.getNom());
 				tfCognoms.setText(cc.getCognoms());
 				tfNom.setEnabled(false);
@@ -387,4 +403,15 @@ public class Controller {
 		}
 		
 	}
+	
+	public void ompirLesArrayLists() {
+		
+		fitxer.omplirALHabitació(hotel.getAlHabitació());
+		fitxer.omplirALClients(hotel.getAlClients());
+		fitxer.omplirALReservesPendents(hotel.getAlReservesPendents(), hotel.getAlClients());
+		fitxer.omplirALReservesComfirmades(hotel.getAlReservesConfirmades(), hotel.getAlClients());
+	}
+
+	
+	
 }

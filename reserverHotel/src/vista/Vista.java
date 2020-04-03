@@ -11,7 +11,6 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.Date;
-import java.time.LocalDate;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -34,16 +33,15 @@ import javax.swing.table.DefaultTableModel;
 
 import com.toedter.calendar.JCalendar;
 import com.toedter.calendar.JDateChooser;
-
 import controller.Controller;
 import model.Client;
-import model.Hotel;
 import model.Reserva;
 
 import java.awt.Image;
 
 public class Vista extends JFrame{
-
+	
+	Controller c;
 	JPanel panell1;
 	JLabel titolP1;
 	JLabel text1P1;
@@ -112,14 +110,15 @@ public class Vista extends JFrame{
 	
 	
 	public Vista() {
-		
         this.setVisible(true);
         this.setSize(1204, 900);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        this.setTitle("Reserves del hotel");
+        this.setTitle("Rohit's Hotel");
         //setResizable(false);
         this.setLayout(null);
         this.getContentPane().setBackground(Color.BLACK);
+        c = new Controller();
+        c.ompirLesArrayLists();
         iniciar();
     }
 
@@ -140,6 +139,8 @@ public class Vista extends JFrame{
     	cercadorReservesListener();
     	perBorrarReservesListener();
     	botoEliminaListener();
+		c.buidarIOmplirTaulaReservesPendents(model1);
+		c.ferUpdateAlaTaula(calendari1, model2, toggle);
     }
     
 	private void posarPanells() {
@@ -447,8 +448,8 @@ public class Vista extends JFrame{
             	
             	if(e.getComponent().getName().equalsIgnoreCase("dni")) {
 
-            		if(Controller.comprovarDni(tfDni)) {
-            			Controller.autoCompletarCampsSiExisteix(tfNom, tfDni, tfCognoms);
+            		if(c.comprovarDni(tfDni)) {
+            			c.autoCompletarCampsSiExisteix(tfNom, tfDni, tfCognoms);
             			resultatDni.setIcon(ticReduit);
                 		panell2.add(resultatDni);
                 	}else {
@@ -462,17 +463,21 @@ public class Vista extends JFrame{
             			resultatNom.setIcon(null);
         				
                 	}
-            		
-            		if(Controller.comprovarDni(tfDni) && Controller.comprovarNom(tfNom) && Controller.comprovarCognoms(tfCognoms) && Controller.comprovarNits(tfNumNits) && Controller.comprovarPersones(tfNumPersones)) {
+           		
+            		if(c.comprovarDni(tfDni) && c.comprovarNom(tfNom) && c.comprovarCognoms(tfCognoms) && c.comprovarNits(tfNumNits) && c.comprovarPersones(tfNumPersones)) {
             			botoReserva.setEnabled(true);
             			panell2.add(botoReserva);
             		}else {
             			botoReserva.setEnabled(false);
             			panell2.add(botoReserva);
             		}
+            		if(tfDni.getText().isBlank()) {
+            			resultatDni.setIcon(null);
+            		}
+
                 }else if(e.getComponent().getName().equalsIgnoreCase("nom")) {
                 	
-            		if(Controller.comprovarNom(tfNom)) {
+            		if(c.comprovarNom(tfNom)) {
             			resultatNom.setIcon(ticReduit);
                 		panell2.add(resultatNom);
                 	}else {
@@ -480,17 +485,21 @@ public class Vista extends JFrame{
                 		panell2.add(resultatNom);
                 	}
             		
-            		if(Controller.comprovarDni(tfDni) && Controller.comprovarNom(tfNom) && Controller.comprovarCognoms(tfCognoms) && Controller.comprovarNits(tfNumNits) && Controller.comprovarPersones(tfNumPersones)) {
+            		if(c.comprovarDni(tfDni) && c.comprovarNom(tfNom) && c.comprovarCognoms(tfCognoms) && c.comprovarNits(tfNumNits) && c.comprovarPersones(tfNumPersones)) {
             			botoReserva.setEnabled(true);
             			panell2.add(botoReserva);
             		}else {
             			botoReserva.setEnabled(false);
             			panell2.add(botoReserva);
             		}
-                	
+            		
+            		
+            		if(tfNom.getText().isBlank()) {
+            			resultatNom.setIcon(null);
+            		}
                 }else if (e.getComponent().getName().equalsIgnoreCase("cognoms")) {
                 	
-            		if(Controller.comprovarCognoms(tfCognoms)) {
+            		if(c.comprovarCognoms(tfCognoms)) {
             			resultatCognoms.setIcon(ticReduit);
                 		panell2.add(resultatCognoms);
                 	}else {
@@ -498,16 +507,21 @@ public class Vista extends JFrame{
                 		panell2.add(resultatCognoms);
                 	}
                 	
-            		if(Controller.comprovarDni(tfDni) && Controller.comprovarNom(tfNom) && Controller.comprovarCognoms(tfCognoms) && Controller.comprovarNits(tfNumNits) && Controller.comprovarPersones(tfNumPersones)) {
+            		if(c.comprovarDni(tfDni) && c.comprovarNom(tfNom) && c.comprovarCognoms(tfCognoms) && c.comprovarNits(tfNumNits) && c.comprovarPersones(tfNumPersones)) {
             			botoReserva.setEnabled(true);
             			panell2.add(botoReserva);
             		}else {
             			botoReserva.setEnabled(false);
             			panell2.add(botoReserva);
             		}
+            		
+            		
+            		if(tfCognoms.getText().isBlank()) {
+            			resultatCognoms.setIcon(null);
+            		}
                 }else if (e.getComponent().getName().equalsIgnoreCase("nits")) {
                 	
-            		if(Controller.comprovarNits(tfNumNits)) {
+            		if(c.comprovarNits(tfNumNits)) {
             			resultatNits.setIcon(ticReduit);
                 		panell2.add(resultatNits);
                 	}else {
@@ -515,16 +529,20 @@ public class Vista extends JFrame{
                 		panell2.add(resultatNits);
                 	}
                 	
-            		if(Controller.comprovarDni(tfDni) && Controller.comprovarNom(tfNom) && Controller.comprovarCognoms(tfCognoms) && Controller.comprovarNits(tfNumNits) && Controller.comprovarPersones(tfNumPersones)) {
+            		if(c.comprovarDni(tfDni) && c.comprovarNom(tfNom) && c.comprovarCognoms(tfCognoms) && c.comprovarNits(tfNumNits) && c.comprovarPersones(tfNumPersones)) {
             			botoReserva.setEnabled(true);
             			panell2.add(botoReserva);
             		}else {
             			botoReserva.setEnabled(false);
             			panell2.add(botoReserva);
             		}
+            		
+            		if(tfNumNits.getText().isBlank()) {
+            			resultatNits.setIcon(null);
+            		}
                 }else  {
                 	
-            		if(Controller.comprovarPersones(tfNumPersones)) {
+            		if(c.comprovarPersones(tfNumPersones)) {
             			resultatPersones.setIcon(ticReduit);
                 		panell2.add(resultatPersones);
                 	}else {
@@ -532,12 +550,16 @@ public class Vista extends JFrame{
                 		panell2.add(resultatPersones);
                 	}
             		
-            		if(Controller.comprovarDni(tfDni) && Controller.comprovarNom(tfNom) && Controller.comprovarCognoms(tfCognoms) && Controller.comprovarNits(tfNumNits) && Controller.comprovarPersones(tfNumPersones)) {
+            		if(c.comprovarDni(tfDni) && c.comprovarNom(tfNom) && c.comprovarCognoms(tfCognoms) && c.comprovarNits(tfNumNits) && c.comprovarPersones(tfNumPersones)) {
             			botoReserva.setEnabled(true);
             			panell2.add(botoReserva);
             		}else {
             			botoReserva.setEnabled(false);
             			panell2.add(botoReserva);
+            		}
+            		
+            		if(tfNumPersones.getText().isBlank()) {
+            			resultatPersones.setIcon(null);
             		}
                 }
             }
@@ -563,7 +585,7 @@ public class Vista extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				setTitle(tfNomHotel.getText());
-				Controller.addTitle(tfNomHotel);
+				c.addTitle(tfNomHotel);
 			}
             
         };
@@ -576,12 +598,12 @@ public class Vista extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				setTitle(tfNomHotel.getText());
-				if(Controller.comprovarData(calendari2)) {
+				if(c.comprovarData(calendari2)) {
 					
-					if(Controller.comprovarClient(tfDni)) {
+					if(c.comprovarClient(tfDni)) {
 						
 						
-						if(Controller.ferReserva(tfDni, tfNom, tfCognoms, tfNumPersones, calendari2, tfNumNits, model1 )) {
+						if(c.ferReserva(tfDni, tfNom, tfCognoms, tfNumPersones, calendari2, tfNumNits, model1 )) {
 							System.out.println(" Fer reserva ");
 							JOptionPane.showMessageDialog(null, " S'ha reaservat correctament ");
 							
@@ -591,7 +613,7 @@ public class Vista extends JFrame{
 						}
 
 					}else {
-						if(Controller.crearClientReserva(tfDni, tfNom, tfCognoms, tfNumPersones, calendari2, tfNumNits, model1)) {
+						if(c.crearClientReserva(tfDni, tfNom, tfCognoms, tfNumPersones, calendari2, tfNumNits, model1)) {
 							System.out.println(" Fer reserva ");
 							JOptionPane.showMessageDialog(null, " S'ha reaservat correctament ");
 						}else {
@@ -643,30 +665,39 @@ public class Vista extends JFrame{
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if(e.getComponent().getName().equalsIgnoreCase("numPers")) {
-					if(Controller.comprovarPersones(tfBackPers)) {
+					if(c.comprovarPersones(tfBackPers)) {
 						resultatNumPersones.setIcon(ticReduit);
 						panell3.add(resultatNumPersones);
 					}else {
 						resultatNumPersones.setIcon(xReduit);
 						panell3.add(resultatNumPersones);
 					}
-					if(Controller.comprovarPersones(tfBackPers) && Controller.comprovarHabitació(tfBackNum)){
+					if(c.comprovarPersones(tfBackPers) && c.comprovarHabitació(tfBackNum)){
 						butoGuarda2.setEnabled(true);
 						panell3.add(butoGuarda2);
 					}else {
 						butoGuarda2.setEnabled(false);
 						panell3.add(butoGuarda2);
 					}
+					if(tfBackPers.getText().isBlank()) {
+						resultatNumPersones.setIcon(null);
+					}
+					
+
 				}else{
-					if(Controller.comprovarHabitació(tfBackNum)) {
+					if(c.comprovarHabitació(tfBackNum)) {
 						resultatNumHabitació.setIcon(ticReduit);
 						panell3.add(resultatNumHabitació);
 					}else {
 						resultatNumHabitació.setIcon(xReduit);
 						panell3.add(resultatNumHabitació);
 					}
+					if(tfBackNum.getText().isBlank()) {
+						resultatNumHabitació.setIcon(null);
+					}
+
 				}
-				if(Controller.comprovarPersones(tfBackPers) && Controller.comprovarHabitació(tfBackNum)){
+				if(c.comprovarPersones(tfBackPers) && c.comprovarHabitació(tfBackNum)){
 					butoGuarda2.setEnabled(true);
 					panell3.add(butoGuarda2);
 				}else {
@@ -687,21 +718,21 @@ public class Vista extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
-				int capacitatActual =Controller.agafarCapacitat(tfBackNum.getText());
+				int capacitatActual =c.agafarCapacitat(tfBackNum.getText());
 
-				if(Controller.afegirHabitació(tfBackNum.getText(), tfBackPers.getText())==0) {
+				if(c.afegirHabitació(tfBackNum.getText(), tfBackPers.getText())==0) {
 
 					JOptionPane.showMessageDialog(null, "L'habitació s'ha afegit correctament. ");
 
 				}else {
-						if(Controller.comrpovarSilaHabEstaReservada(tfBackNum.getText(), tfBackPers.getText())) {
+						if(c.comrpovarSilaHabEstaReservada(tfBackNum.getText(), tfBackPers.getText())) {
 							JOptionPane.showConfirmDialog(null, "L'habitació en aquest moment està reservada llavors no es poden fer canvis");
 						}else {
 						int opció = JOptionPane.showConfirmDialog(null, "L'habitació amb aquest numero ja existeix. Segur que vols canviar la capacitat? (La capacitat actual és de : "+capacitatActual);
 	
 						switch(opció) {
 						case 0:
-							Controller.actualitzarHabitació(tfBackNum.getText(), tfBackPers.getText());
+							c.actualitzarHabitació(tfBackNum.getText(), tfBackPers.getText());
 							break;
 						case 1:
 							break;
@@ -736,14 +767,14 @@ public class Vista extends JFrame{
     		            switch(opció) {
     		            	case 0:
     		            		JOptionPane.showMessageDialog(null, "La reserva pendent d'ha confirmat correctament");
-    		            		Controller.comfirmarLaReserva(row);
-    		            		Controller.posarReservaAComfirmades();
-    		            		Controller.buidarIOmplirTaulaReservesPendents(model1);
+    		            		c.comfirmarLaReserva(row);
+    		            		c.buidarIOmplirTaulaReservesPendents(model1);
+    		            		
 
     		            		break;
     		            	case 1:
-    		            		Controller.borrarReservaPendent(row);
-    		            		Controller.buidarIOmplirTaulaReservesPendents(model1);
+    		            		c.borrarReservaPendent(row);
+    		            		c.buidarIOmplirTaulaReservesPendents(model1);
     		            		break;
     		            	case 2:
     		            		break;
@@ -753,11 +784,11 @@ public class Vista extends JFrame{
     				if(toggle.isSelected()) {
     					toggle.setText("Sortida");
     					System.out.println("Esta selecionat(Sortida)");
-    					Controller.toggleSelecionat(calendari1,  model2);
+    					c.toggleSelecionat(calendari1,  model2);
     				}else {
     					toggle.setText("Entrada");
     					System.out.println("No esta selecionat(Entrada)");
-    					Controller.toggleNoSelecionat(calendari1, model2);
+    					c.toggleNoSelecionat(calendari1, model2);
     				}
     		    }  
     	});   		
@@ -773,11 +804,11 @@ public class Vista extends JFrame{
 					if(toggle.isSelected()) {
 						toggle.setText("Sortida");
 						System.out.println("Esta selecionat(Sortida)");
-						Controller.toggleSelecionat(calendari1,  model2);
+						c.toggleSelecionat(calendari1,  model2);
 					}else {
 						toggle.setText("Entrada");
 						System.out.println("No esta selecionat(Entrada)");
-						Controller.toggleNoSelecionat(calendari1, model2);
+						c.toggleNoSelecionat(calendari1, model2);
 					}
 				}
     		};
@@ -791,7 +822,7 @@ public class Vista extends JFrame{
 				@Override
 				public void propertyChange(PropertyChangeEvent evt) {
 
-					Controller.ferUpdateAlaTaula(calendari1, model2, toggle);
+					c.ferUpdateAlaTaula(calendari1, model2, toggle);
 				}
     		};
     		calendari1.addPropertyChangeListener(ll);
@@ -820,7 +851,7 @@ public class Vista extends JFrame{
 						listModel2.clear();
 						listModel1.clear();
 						
-						Controller.cercar(tfNomClient.getText(), listModel1);
+						c.cercar(tfNomClient.getText(), listModel1);
 					}
 				}
     		};
@@ -837,7 +868,7 @@ public class Vista extends JFrame{
 				public void valueChanged(ListSelectionEvent e) {
 
 					if(e.getValueIsAdjusting()) {
-						Controller.cercarR(lista1.getSelectedValue(),listModel2);	
+						c.cercarR(lista1.getSelectedValue(),listModel2);	
 					}
 				}
     		};
@@ -860,7 +891,6 @@ public class Vista extends JFrame{
 						}
 					}
 				}
-    			
     		};
     		lista2.addListSelectionListener(triarllistaReserves);	
     	}
@@ -877,10 +907,11 @@ public class Vista extends JFrame{
 					
 					case 0:
 						JOptionPane.showMessageDialog(null, "S'ha eliminat la reserva correctament ");
-						Controller.borrarReserva(lista2.getSelectedValue());
+						c.borrarReserva(lista2.getSelectedValue());
 						listModel2.remove(lista2.getSelectedIndex());
-						Controller.ferUpdateAlaTaula(calendari1, model2, toggle);
-						Controller.buidarIOmplirTaulaReservesPendents(model1);
+						c.ferUpdateAlaTaula(calendari1, model2, toggle);
+						c.buidarIOmplirTaulaReservesPendents(model1);
+						
 						break;
 					case 1:
 						
@@ -889,9 +920,7 @@ public class Vista extends JFrame{
 					
 						break;
 					}
-
 				}
-    			
     		};
     		botoBorrar.addActionListener(eliminar);    		
     	}
